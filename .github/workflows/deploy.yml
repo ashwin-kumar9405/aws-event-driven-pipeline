@@ -1,4 +1,4 @@
-name: AWS Connection Test
+name: Deploy AWS Infrastructure with Terraform
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  aws-test:
+  terraform-deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,12 +14,19 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2   
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ap-south-1
 
-      - name: Verify AWS identity
-        run: aws sts get-caller-identity
+      - name: Install Terraform
+        uses: hashicorp/setup-terraform@v2
 
+      - name: Terraform Init
+        working-directory: terraform
+        run: terraform init
+
+      - name: Terraform Apply
+        working-directory: terraform
+        run: terraform apply -auto-approve
